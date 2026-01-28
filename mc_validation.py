@@ -14,14 +14,14 @@ plt.close('all')
 matplotlib.rcParams['font.family'] = 'serif'
 matplotlib.rcParams['mathtext.fontset'] = 'cm'
 matplotlib.rcParams['font.size'] = 18
-matplotlib.rcParams['savefig.dpi'] = 18
+matplotlib.rcParams['savefig.dpi'] = 500
 
 #%% Inputs
-azimuth=np.array([0,72,144,216,288,288])#[deg] azimuth angles
-elevation=np.array([45,45,45,45,45,90])#[deg] elevation angles
+azimuth=np.array([138.8,170.8,41.2,0,90,180])#[deg] azimuth angles
+elevation=np.array([75.2,90,75.2,70,70,70])#[deg] elevation angles
 
 RS_rot=np.array([1,0.8,0.5,0,-0.1,0])#[IEC 61400-1]
-err=0.1#relative error on flow field
+err=0.01#relative error on flow field
 
 wds=np.arange(360)#[deg] wind direction loop
 L=1000#MC draws
@@ -146,7 +146,7 @@ plt.subplot(1,3,3)
 plt.plot(wds,uu_var,'k',label=f'MC (mean={str(np.round(uu_var_avg,4))})')
 plt.plot(wds,uu_var2,'r',label=f'Theory (mean={str(np.round(uu_var2_avg,4))})')
 plt.xlabel(r'$\theta_w$ [$^\circ$]')
-plt.ylabel(r'$\sigma^2(\hat{\overline{u^\prime}})$')
+plt.ylabel(r'$\sigma^2(\hat{\overline{u^{\prime 2}}})$')
 plt.grid()
 plt.legend()
 plt.ylim([0,np.max(uu_var)])

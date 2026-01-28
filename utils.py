@@ -4,6 +4,18 @@ Utilities for scan optimizazions
 """
 import numpy as np
 
+def vec2str(vec,separator=' ',format='%f'):
+    s=''
+    for v in vec:
+        s=s+format % v+separator
+    return s[:-len(separator)]
+
+def tan(x):
+    return np.tan(np.radians(x))
+
+def arctan(x):
+    return np.degrees(np.arctan(x))
+
 def cos(x):
     return np.cos(np.radians(x))
 
@@ -44,7 +56,6 @@ def rs_matrix(azimuth,elevation):
     B[:,5]=2*cos(elevation)*sin(elevation)*sin(90-azimuth)
     
     return B
-
 
 def error_ws_wd(azimuth,elevation,wd=None):
     '''

@@ -106,34 +106,40 @@ def error_uu(azimuth,elevation,wd=None):
     '''
     Nb=len(azimuth)
     
-    #RS to LOS variance matrix
-    B=rs_matrix(azimuth, elevation)
+    if Nb>=6:
     
-    try:
-        B_inv=np.linalg.inv(B)
-    except:
-        return np.inf          
-    
-    #expanded solution matrix
-    M=np.zeros((6,Nb*6))
-    for i in range(6):
-        for j in range(Nb):
-            for k in range(6):
-                M[i,j*6+k]=B_inv[i,j]*B[j,k]
-                    
-    #error covariance
-    S=M@M.T
-    
-    #error propagation
-    if wd==None:
-        J_Jt_avg=np.array([[3/8, 1/8, 0,   0, 0, 0],
-                           [1/8, 3/8, 0,   0 ,0, 0],
-                           [0,   0,   0,   0, 0, 0],
-                           [0,   0,   0, 1/2, 0, 0],
-                           [0,   0,   0,   0, 0, 0],
-                           [0,   0,   0,   0, 0, 0]])
-        var_uu=np.trace(S@J_Jt_avg)
+        #RS to LOS variance matrix
+        B=rs_matrix(azimuth, elevation)
+        
+        try:
+            B_inv=np.linalg.pinv(B)
+        except:
+            return np.inf          
+        
+        #expanded solution matrix
+        M=np.zeros((6,Nb*6))
+        for i in range(6):
+            for j in range(Nb):
+                for k in range(6):
+                    M[i,j*6+k]=B_inv[i,j]*B[j,k]
+                        
+        #error covariance
+        S=M@M.T
+        
+        #error propagation
+        if wd==None:
+            J_Jt_avg=np.array([[3/8, 1/8, 0,   0, 0, 0],
+                               [1/8, 3/8, 0,   0 ,0, 0],
+                               [0,   0,   0,   0, 0, 0],
+                               [0,   0,   0, 1/2, 0, 0],
+                               [0,   0,   0,   0, 0, 0],
+                               [0,   0,   0,   0, 0, 0]])
+            var_uu=np.trace(S@J_Jt_avg)
+        else:
+            J=np.array([cos(270-wd)**2,sin(270-wd)**2,0,2*cos(270-wd)*sin(270-wd),0,0])
+            var_uu=J@S@J.T
+        
     else:
-        J=np.array([cos(270-wd)**2,sin(270-wd)**2,0,2*cos(270-wd)*sin(270-wd),0,0])
-        var_uu=J@S@J.T
+        var_uu=0
+        print('Could not retrieve second order moment with less than 6 beams.')
     return var_uu

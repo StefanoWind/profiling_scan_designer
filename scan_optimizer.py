@@ -20,9 +20,9 @@ matplotlib.rcParams['savefig.dpi'] = 500
 
 #%% Inputs
 N_opt=20#number of optimizations
-ele_min=70#[deg] minimum elevation
-x_con=0#[m] x of contraint
-z_con=1000#[m] z of constraint
+ele_min=45#[deg] minimum elevation
+x_con=-7#[m] x of constraint
+z_con=10#[m] z of constraint
 Nb=6#number of beams
 weight=0.5#weight of wind speed vs. wind speed variance
 
@@ -50,6 +50,8 @@ f_best=[]
 azi_best=[]
 ele_best=[]
 
+assert x_con<=0, "Positive x_con not implemented"
+
 #%% Main
 ctr=0
 while len(f_opt)<N_opt:
@@ -58,15 +60,13 @@ while len(f_opt)<N_opt:
     ele0=np.random.rand(Nb)*(90-ele_min)+ele_min
     
     #constraints
-    cons=({'type': 'ineq', 'fun': lambda x: min(1/utl.tan(x[6:])*utl.cos(90-x[:6]))-x_con/z_con})
+    cons=({'type': 'ineq', 'fun': lambda x: min(1/utl.tan(x[Nb:])*utl.cos(90-x[:Nb]))-x_con/z_con})
 
     if x_con<=0:
-        bous=((0,360),(0,360),(0,360),(0,360),(0,360),(0,360),
-              (ele_min,90),(ele_min,90),(ele_min,90),(ele_min,90),(ele_min,90),(ele_min,90))
+        bous=Nb*((0,360),)+Nb*((ele_min,90),)
     else:
-        ele_max=utl.arctan(z_con/x_con)    
-        bous=((-90,90),(-90,90),(-90,90),(-90,90),(-90,90),(-90,90),
-              (ele_min,ele_max),(ele_min,ele_max),(ele_min,ele_max),(ele_min,ele_max),(ele_min,ele_max),(ele_min,ele_max))
+        ele_max=utl.arctan(z_con/x_con)
+        bous=Nb*((-90,90),)+Nb*((ele_min,ele_max),)
   
     #optimization
     res = minimize(error, np.append(azi0,ele0),
@@ -114,12 +114,12 @@ ax.set_xlim([-1,1])
 ax.set_ylim([-1,1])
 ax.set_aspect('equal')
 plt.title(r'$'+str(weight)+r'\sigma^2(\hat{\overline{u}}) + '\
-             +str(1-weight)+'\sigma^2(\hat{\overline{u^{\prime 2}}})='+str(f_best[-1])+r'$'+'\n'+
+             +str(1-weight)+'\sigma(\hat{\overline{u^{\prime 2}}})='+str(f_best[-1])+r'$'+'\n'+
           r'$\theta=['+str(utl.vec2str(np.round(azi_best[-1],1),', ','%06.2f'))+']^\circ$'+'\n'+
           r'$\beta=['+str(utl.vec2str(np.round(ele_best[-1],1),', ','%06.2f'))+']^\circ$')
-ax.set_xlabel(r'$x/z_\text{cos}$')
-ax.set_ylabel(r'$y/z_\text{cos}$')
-ax.set_zlabel(r'$z/z_\text{cos}$')
+ax.set_xlabel(r'$x/z_\text{con}$')
+ax.set_ylabel(r'$y/z_\text{con}$')
+ax.set_zlabel(r'$z/z_\text{con}$')
 
 plt.grid()
 
